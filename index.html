@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Database</title>
+</head>
+
+<body>
+
+	<div ng-app="spreadSheetDatabaseApp" ng-controller="ssdbController">
+		
+		<ul>
+			<li ng-repeat="pokemon in rows">{{ pokemon.name }}</li>
+		</ul>
+	</div>
+
+	<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+	<script>
+
+var app = angular.module('spreadSheetDatabaseApp', []);
+app.controller('ssdbController', function ($scope, $http) {
+	$scope.rows = [];
+
+$http({
+  method: 'GET',
+  url: 'https://spreadsheets.google.com/feeds/list/1sVd4tjyyZbu0JD62QuuRN0KlHYsOnvRcSIguC-pxOcY/1/public/basic?alt=json'
+}).then(function successCallback(response) {
+	var cells = response.data.feed.entry;
+			for (var i = 0; i < cells.length; i++) {
+				var rowObj = {};
+				rowObj.id = cells[i].title.$t;
+				var rowCols = cells[i].content.$t.split(',');
+				for (var j = 0; j < rowCols.length; j++){
+					var keyVal = rowCols[j].split(':');
+					rowObj[keyVal[0].trim()] = keyVal[1].trim();
+				}
+				$scope.rows.push(rowObj);
+			}
+			console.log($scope.rows);
+  }, function errorCallback(response) {
+	console.log("bad: " + JSON.stringify(response));
+  });
+
+});
+	</script>
+</body>
+</html>
